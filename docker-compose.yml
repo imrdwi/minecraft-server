@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  server:
+    image: itzg/minecraft-server
+    ports:
+      - 25565:25565/tcp
+      - 25565:25565/udp
+      - 19132:19132/udp
+    environment:
+      EULA: "TRUE"
+      TYPE: ${SERVER_TYPE}
+      VERSION: ${SERVER_VERSION}
+      TZ: ${SERVER_TIMEZONE}
+      MODE: ${SERVER_MODE}
+      FORCE_MODE: ${SERVER_MODE_ENFORCE}
+      MAX_PLAYERS: ${SERVER_MAX_PLAYERS}
+      MOTD: ${SERVER_MOTD}
+      DIFFICULTY: ${SERVER_DIFFICULTY}
+      MEMORY: ${ALLOCATED_MEMORY}
+      ENABLE_AUTOPAUSE: ${AUTOPAUSE}
+      ENABLE_QUERY: ${ENABLE_QUERY}
+      ENABLE_RCON: ${RCON_ENABLE}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      OPS_FILE: "/config/ops.json"
+      WHITELIST_FILE: ${WHITELIST_FILE}
+      ENABLE_WHITELIST: ${WHITELIST}
+      ALLOW_NETHER: ${ALLOW_NETHER}
+      ANNOUNCE_PLAYER_ACHIEVEMENTS: ${ANNOUNCE_ACHIEVEMENTS}
+      ENABLE_COMMAND_BLOCK: ${ENABLE_COMMAND_BLOCK}
+      OVERRIDE_SERVER_PROPERTIES: ${RECREATE_SERVER_PROPERTIES}
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    volumes:
+      - minecraft_data:/data
+      - ./config:/config
+      - ./plugins:/plugins
+  backup:
+    image: itzg/mc-backup
+    environment:
+      BACKUP_INTERVAL: ${BACKUP_INTERVAL}
+      PRUNE_BACKUP_DAYS: ${BACKUP_RETENTION}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+    volumes:
+      - minecraft_data:/data:ro
+      - ./backups:/backups
+    network_mode: "service:server"
+volumes:
+  minecraft_data:
+    external: true
